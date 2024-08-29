@@ -30,17 +30,19 @@ class ContactList extends StatelessWidget {
   }
 
   Widget _buildContactImageWidget(int index, String contactName, String? imagePath) {
-    if (imagePath != null && imagePath.isNotEmpty) {
-      return Image.file(
-        File(imagePath),
-        width: 40,
-        height: 40,
+    double size = 40;
+    File imageFile = File(imagePath ?? '');
+
+    if (imagePath != null && imagePath.isNotEmpty && imageFile.existsSync()) {
+      return CircleAvatar(
+        radius: size / 2,
+        backgroundImage: FileImage(imageFile),
       );
     }
 
     return Container(
-      width: 40,
-      height: 40,
+      width: size,
+      height: size,
       decoration: BoxDecoration(
         color: generateInitialsBackgroundColor(index),
         shape: BoxShape.circle,

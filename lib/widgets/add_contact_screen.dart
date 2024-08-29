@@ -2,6 +2,7 @@ import 'package:contacts_demo/common/widgets_common.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../common/text_styles.dart';
 import '../data/blocs/contacts_bloc.dart';
 import '../models/contact.dart';
 import 'add_contact_form.dart';
@@ -28,18 +29,11 @@ class _AddContactScreenState extends State<AddContactScreen> {
 
   @override
   Widget build(BuildContext context) {
-    /*final ContactsState myState = context.watch<ContactsBloc>().state;
-    print('@#@#onWatch $myState');*/
-    /*.stream.listen((event) {
-      print('@#@#onData called $event');
-    }, onDone: () {
-      print('@#@#onDone called');
-    });*/
     return Scaffold(
       appBar: AppBar(
         title: Text(_isInEditMode ? 'Update Contact' : 'Add Contact'),
         leading: buildBackButtonWidget(context),
-        actions: _buildActionIcons(context),
+        actions: _buildActionIcons(),
       ),
       body: AddContactForm(
         editContact: widget.editContact,
@@ -52,7 +46,7 @@ class _AddContactScreenState extends State<AddContactScreen> {
     );
   }
 
-  List<Widget> _buildActionIcons(BuildContext context) {
+  List<Widget> _buildActionIcons() {
     List<Widget> actions = [
       IconButton(
         onPressed: () {
@@ -68,14 +62,9 @@ class _AddContactScreenState extends State<AddContactScreen> {
     if (_isInEditMode) {
       actions.add(IconButton(
         onPressed: () {
-          _showDeleteContactDialog(context, () {
+          _showDeleteContactDialog(() {
             context.read<ContactsBloc>().add(DeleteContact(widget.editContact!.id));
             Navigator.pop(context);
-            /*DatabaseHelper.db.deleteContact(widget.editContact!.id).then((id) {
-              if (context.mounted) {
-                Navigator.pop(context, id > 0 ? id : null);
-              }
-            });*/
           });
         },
         icon: const Icon(
@@ -88,19 +77,15 @@ class _AddContactScreenState extends State<AddContactScreen> {
     return actions;
   }
 
-  Future<void> _showDeleteContactDialog(BuildContext context, void Function() onDelete) {
+  Future<void> _showDeleteContactDialog(void Function() onDelete) {
     return showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) {
         return AlertDialog(
-          title: const Text(
-            'Delete Contact',
-            style: TextStyle(fontSize: 21),
-          ),
+          title: const Text('Delete Contact'),
           content: const Text(
             'Do you want to delete this contact?',
-            style: TextStyle(fontSize: 16),
           ),
           actions: [
             TextButton(
@@ -117,9 +102,9 @@ class _AddContactScreenState extends State<AddContactScreen> {
                 onPressed: () {
                   Navigator.pop(context);
                 },
-                child: const Text(
+                child: Text(
                   'Cancel',
-                  style: TextStyle(fontSize: 16),
+                  style: popupDialogButtonTextStyle,
                 )),
           ],
         );

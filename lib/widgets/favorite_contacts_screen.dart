@@ -3,14 +3,9 @@ import 'package:flutter/material.dart';
 import '../common/widgets_common.dart';
 import 'contact_list_wrapper.dart';
 
-class FavoriteContactsScreen extends StatefulWidget {
+class FavoriteContactsScreen extends StatelessWidget {
   const FavoriteContactsScreen({super.key});
 
-  @override
-  State<FavoriteContactsScreen> createState() => _FavoriteContactsScreenState();
-}
-
-class _FavoriteContactsScreenState extends State<FavoriteContactsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -3,15 +3,8 @@ import 'package:flutter/material.dart';
 
 import 'contact_list_wrapper.dart';
 
-class ContactListScreen extends StatefulWidget {
+class ContactListScreen extends StatelessWidget {
   const ContactListScreen({super.key});
-
-  @override
-  State<ContactListScreen> createState() => _ContactListScreenState();
-}
-
-class _ContactListScreenState extends State<ContactListScreen> {
-  // /storage/emulated/0/Pictures/Instagram/IMG_20240105_002156_586.jpg
 
   @override
   Widget build(BuildContext context) {

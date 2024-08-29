@@ -1,8 +1,14 @@
+import 'dart:io';
+
 import 'package:contacts_demo/models/contact.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart';
 
-import '../common/widgets_common.dart';
 import '../common/text_styles.dart';
+import '../common/widgets_common.dart';
 
 class AddContactForm extends StatefulWidget {
   final Contact? editContact;
@@ -19,6 +25,8 @@ class _AddContactFormState extends State<AddContactForm> {
   late final TextEditingController _nameController;
   late final TextEditingController _mobileController;
   late final TextEditingController _landlineController;
+  final _imagePicker = ImagePicker();
+  String? _photoPath;
 
   @override
   void initState() {
@@ -26,6 +34,7 @@ class _AddContactFormState extends State<AddContactForm> {
     _nameController = TextEditingController(text: widget.editContact?.name ?? '');
     _mobileController = TextEditingController(text: widget.editContact?.mobile ?? '');
     _landlineController = TextEditingController(text: widget.editContact?.landline ?? '');
+    _photoPath = widget.editContact?.photoPath;
   }
 
   @override
@@ -46,24 +55,6 @@ class _AddContactFormState extends State<AddContactForm> {
       ],
     );
   }
-
-  Widget _buildPhotoPicker() => Stack(
-        alignment: Alignment.center,
-        children: [
-          Container(
-            width: 100,
-            height: 100,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(),
-            ),
-          ),
-          const Icon(
-            Icons.camera_alt,
-            size: 30,
-          ),
-        ],
-      );
 
   Widget _buildContactForm() => Padding(
         padding: const EdgeInsets.all(20),
@@ -133,6 +124,35 @@ class _AddContactFormState extends State<AddContactForm> {
         ),
       );
 
+  Widget _buildPhotoPicker() => GestureDetector(
+        onTap: () => _showImagePickerDialog(),
+        child: _buildImagePreviewOrPicker(),
+      );
+
+  Widget _buildImagePreviewOrPicker() {
+    double size = 100;
+    File imageFile = File(_photoPath ?? '');
+    if (_photoPath != null && _photoPath!.isNotEmpty && imageFile.existsSync()) {
+      return CircleAvatar(
+        radius: size / 2,
+        backgroundImage: FileImage(imageFile),
+      );
+    } else {
+      return Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(),
+        ),
+        child: const Icon(
+          Icons.camera_alt,
+          size: 30,
+        ),
+      );
+    }
+  }
+
   Widget _buildFormTitleText(String title) => Text(
         title,
         style: formFieldTitleStyle,
@@ -146,10 +166,12 @@ class _AddContactFormState extends State<AddContactForm> {
         onPressed: () {
           if (_formKey.currentState?.validate() == true) {
             Contact contact = Contact(
-                id: widget.editContact?.id ?? -1,
-                name: _nameController.text.trim(),
-                mobile: _mobileController.text.trim(),
-                landline: _landlineController.text.trim());
+              id: widget.editContact?.id ?? -1,
+              name: _nameController.text.trim(),
+              mobile: _mobileController.text.trim(),
+              landline: _landlineController.text.trim(),
+              photoPath: _photoPath,
+            );
             widget.onSaved(contact);
           }
         },
@@ -175,5 +197,107 @@ class _AddContactFormState extends State<AddContactForm> {
     }
 
     return null;
+  }
+
+  void _showImagePickerDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text(
+            'Choose image source',
+          ),
+          content: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              MaterialButton(
+                onPressed: _captureImageFromCamera,
+                child: Text(
+                  'Camera',
+                  style: popupDialogButtonTextStyle,
+                ),
+              ),
+              MaterialButton(
+                onPressed: _pickImageFromGallery,
+                child: Text(
+                  'Gallery',
+                  style: popupDialogButtonTextStyle,
+                ),
+              ),
+              MaterialButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  _updatePhotoPath(null);
+                },
+                child: Text(
+                  'Remove',
+                  style: popupDialogButtonTextStyle,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _pickImageFromGallery() {
+    Navigator.pop(context);
+    _fetchImageAndSave(ImageSource.gallery);
+  }
+
+  void _captureImageFromCamera() {
+    Navigator.pop(context);
+    _fetchImageAndSave(ImageSource.camera);
+  }
+
+  void _fetchImageAndSave(ImageSource source) async {
+    try {
+      final image = await _imagePicker.pickImage(
+        source: source,
+        maxHeight: 500,
+        maxWidth: 500,
+      );
+
+      if (image != null) {
+        _copySelectedImageFile(image);
+      }
+    } on PlatformException {
+      _showImagePickerErrorDialog();
+    }
+  }
+
+  void _copySelectedImageFile(XFile imageFile) async {
+    final directory = await getApplicationDocumentsDirectory();
+    String newPath = path.join(directory.path, imageFile.name);
+    await imageFile.saveTo(newPath);
+    _updatePhotoPath(newPath);
+  }
+
+  void _updatePhotoPath(String? newPath) {
+    setState(() => _photoPath = newPath);
+  }
+
+  void _showImagePickerErrorDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Error'),
+          content: const Text('There was some error fetching image. Please try again.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text(
+                'Okay',
+                style: popupDialogButtonTextStyle,
+              ),
+            )
+          ],
+        );
+      },
+    );
   }
 }

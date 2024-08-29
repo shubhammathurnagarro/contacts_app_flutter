@@ -24,12 +24,15 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: appTitle,
         theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
-          appBarTheme: AppBarTheme(
-            titleTextStyle: appBarTitleStyle,
-            centerTitle: true,
-          ),
-        ),
+            colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
+            appBarTheme: AppBarTheme(
+              titleTextStyle: appBarTitleStyle,
+              centerTitle: true,
+            ),
+            dialogTheme: DialogTheme(
+              titleTextStyle: popupDialogTitleTextStyle,
+              contentTextStyle: popupDialogButtonTextStyle,
+            )),
         initialRoute: Routes.home.routeName,
         routes: <String, WidgetBuilder>{
           Routes.home.routeName: (_) => const ContactListScreen(),

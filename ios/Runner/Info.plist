@@ -45,5 +45,9 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSPhotoLibraryUsageDescription</key>
+    <string>Permission needed to access images from gallery to use as Contact image.</string>
+    <key>NSCameraUsageDescription</key>
+    <string>Permission needed to capture image from camera to use as Contact image.</string>
 </dict>
 </plist>
